@@ -6,10 +6,9 @@ import search from './search'
 
 const map = L.map('map').setView([46.7785, 6.6412], 15)
 
-const tiles = L.tileLayer('https://tile.osm.ch/switzerland/{z}/{x}/{y}.png', {
-  maxZoom: 18,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  bounds: [[45, 5], [48, 11]]
+const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 19,
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 })
 
 tiles.addTo(map)
@@ -18,7 +17,15 @@ tiles.addTo(map)
 map.on('click', e => {
   const { lat, lng } = e.latlng
   const geojson = { type: 'Point', coordinates: [lng, lat] }
-  console.log(geojson)
+  const rayon1km = buffer(geojson, 1)
+  getBars(bbox(rayon1km))
+    .then(bars => {
+      bars.forEach(({ latitude, longitude, name}) => {
+        L.marker([latitude, longitude])
+          .bindPopup(name)
+          .addTo(map)
+      })
+    })
 })
 
 document.getElementById('search')
